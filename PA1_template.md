@@ -5,14 +5,33 @@ output:
     keep_md: true
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 The libraries 'dplyr' and 'lattice' are needed for this assignment.
 
-```{r}
+
+```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(lattice)
 ```
 
@@ -38,7 +57,8 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 
 First the data has to be loaded. It is assumed that the data has been downloaded already (see link above) and saved in the working directory.
 
-```{r}
+
+```r
 df <- read.csv('activity.csv', header=TRUE, sep=',')
 ```
 
@@ -46,21 +66,37 @@ df <- read.csv('activity.csv', header=TRUE, sep=',')
 
 1. Calculate the total number of steps taken per day.
 
-```{r}
+
+```r
 Temp <- group_by(df, date) %>% summarise_at(vars(steps),funs(sum(as.numeric(.,na.rm=TRUE))))
 ```
 
 2. A histogram of the total number of steps taken each day is shown
 
-```{r}
+
+```r
 hist(Temp$steps, main="Histogram of number of steps per day", xlab="Number of steps", col="green")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
 3. Calculate and report the mean and median of the total number of steps taken per day
 
-```{r}
+
+```r
 mean(Temp$steps, na.rm=TRUE)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(Temp$steps, na.rm=TRUE)
+```
+
+```
+## [1] 10765
 ```
 
 ## What is the average daily activity pattern?
@@ -69,20 +105,32 @@ median(Temp$steps, na.rm=TRUE)
 
 First calculate the average number of steps per time interval.
 
-```{r}
+
+```r
 Temp1 <- group_by(df, interval) %>% summarise_at(vars(steps),funs(mean), na.rm=TRUE)
 ```
 
 Then make the plot.
 
-```{r}
+
+```r
 plot(Temp1$interval, Temp1$steps, type="l", main="Average number of steps per time interval", xlab="time interval", ylab="average number of steps", col="red")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
+
 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-```{r}
+
+```r
 Temp1[which.max(Temp1$steps), 1]
+```
+
+```
+## # A tibble: 1 x 1
+##   interval
+##      <int>
+## 1      835
 ```
 
 
@@ -90,14 +138,20 @@ Temp1[which.max(Temp1$steps), 1]
 
 1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs).
 
-```{r}
+
+```r
 sum(Reduce('|', lapply(df, is.na)))
+```
+
+```
+## [1] 2304
 ```
 
 2. Devise a strategy for filling in all of the missing values in the dataset. The strategy is to use the mean for that 5-minute interval.
 3. Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
-```{r}
+
+```r
 df2 <- df
 df2$steps <- ifelse(is.na(df2$steps) == TRUE, Temp1$steps[Temp1$interval %in% df2$interval], df2$steps) 
 ```
@@ -106,11 +160,28 @@ df2$steps <- ifelse(is.na(df2$steps) == TRUE, Temp1$steps[Temp1$interval %in% df
 
 First the data is grouped by the date and the total number of steps is calculated, followed by plotting the histogram. Finally the mean and median are calculated.
 
-```{r}
+
+```r
 Temp2 <- group_by(df2, date) %>% summarise_at(vars(steps),funs(sum(as.numeric(.,na.rm=TRUE))))
 hist(Temp2$steps, main="Histogram of number of steps per day", xlab="Number of steps", col="green")
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
+
+```r
 mean(Temp2$steps, na.rm=TRUE)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(Temp2$steps, na.rm=TRUE)
+```
+
+```
+## [1] 10766.19
 ```
 
 Do these values differ from the estimates from the first part of the assignment?
@@ -120,21 +191,32 @@ What is the impact of imputing missing data on the estimates of the total daily 
 
 The sum of the number of steps for the original data is:
 
-```{r}
+
+```r
 sum(Temp$steps, na.rm=TRUE)
+```
+
+```
+## [1] 570608
 ```
 
 And the sum of the number of steps of the imputed data is:
 
-```{r}
+
+```r
 sum(Temp2$steps, na.rm=TRUE)
+```
+
+```
+## [1] 656737.5
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
 1. Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
-```{r}
+
+```r
 df2 <- mutate(df2, day_type=as.factor(ifelse(weekdays(as.Date(df2$date)) %in% c("Saturday", "Sunday"), "weekend", "weekday")))
 ```
 
@@ -142,8 +224,11 @@ df2 <- mutate(df2, day_type=as.factor(ifelse(weekdays(as.Date(df2$date)) %in% c(
 
 First the data is grouped by the day_type and the time interval and the average number of steps is calculated. Then the plot is drawn.
 
-```{r}
+
+```r
 Temp3 <- group_by(df2, interval, day_type) %>% summarise_at(vars(steps),funs(mean), na.rm=TRUE)
 xyplot(steps~interval | factor(day_type), data=Temp3, pch=19, main="Steps per time interval", xlab="interval",  ylab="Number of steps",layout=c(1,2),type="l")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-15-1.png)<!-- -->
 
